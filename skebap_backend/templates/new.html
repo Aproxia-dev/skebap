@@ -1,13 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
+<button onclick="upload()">
+xd
+</button>
 <div id="editor"></div>
 
 <style>
     html, body, #editor {
         position: absolute;
         left: 0;
-        top: 0;
-        width: 100%;
+        top: 50;
+        width: 90%;
         height: 100%;
         margin: 0;
         padding: 0;
@@ -16,6 +19,7 @@
 </style>
 
 <script>
+    // sources setup
     require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.45.0/min/vs' }});
     window.MonacoEnvironment = { getWorkerUrl: () => proxy };
 
@@ -26,16 +30,49 @@
     	importScripts('https://unpkg.com/monaco-editor@0.45.0/min/vs/base/worker/workerMain.js');
     `], { type: 'text/javascript' }));
 
+
+    // editor init
+    let editor
+
     require(["vs/editor/editor.main"], function () {
-    	let editor = monaco.editor.create(document.getElementById('editor'), {
-    		value: [
-    			'function x() {',
-    			'\tconsole.log("Hello world!");',
-    			'}'
-    		].join('\n'),
-    		language: 'javascript',
+    	editor = monaco.editor.create(document.getElementById('editor'), {
+    		//value: [
+    		//	'function x() {',
+    		//	'\tconsole.log("Hello world!");',
+    		//	'}'
+    		//].join('\n'),
+    		//language: 'javascript',
     		theme: 'vs-dark'
     	});
     });
+
+    function upload() {
+        fetch('/api/', {
+            method: "POST",
+            body: JSON.stringify({
+                content: editor.getValue()
+            }),
+            headers: {
+              "Content-type": "application/json; charset=UTF-8"
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    editor.setValue("")
+                    response.json().then(json =>{
+                        const new_url = '/bap/' + json['id']
+
+                        htmx.ajax('GET', new_url, '#content')
+                            .then(() => {
+                                history.pushState(null, "", new_url)
+                            })
+                    })
+                } else {
+                    alert('ooopsssss')
+                }
+            })
+    }
+
+
 </script>
 {% endblock %}
