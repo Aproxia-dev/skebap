@@ -1,0 +1,43 @@
+#sidebar {
+	overflow: hidden;
+	position: fixed;
+	top: 0;
+	right: 0;
+	height: 100%; 
+	width: 56px;
+
+	display: flex;
+	flex-direction: column;
+	flex-flow: space-around;
+	align-items: stretch;
+	justify-content: space-between;
+
+	background-color: #333;
+}
+
+.button {
+	color: #fff;
+	font-size: 40px;
+
+	display: flex;
+	flex-direction: row;
+	flex-flow: space-around;
+	align-items: end;
+	justify-content: space-between;
+}
+
+.button .text {
+	padding: 8px;
+	display: block;
+	text-align: right;
+}
+
+.button .icon {
+	padding: 8px;
+	align: center;
+	text-align: center;
+}
+
+.button:hover {
+	background-color: #555;
+}

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+    <meta name="description" content="Upload code snippets and logs with a single drag-and-drop!" />
+    <link rel="stylesheet" href="/static/main.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://kit.fontawesome.com/497f4f4907.js" crossorigin="anonymous"></script>
+    {% if monaco %}
+    <script src="https://unpkg.com/monaco-editor@0.45.0/min/vs/loader.js"></script>
+    {% endif %}
+    <title>Skebap</title>
+</head>
+<body>
+    <dialog id="login">
+        <form>
+            <label for="email">Email:</label><br />
+            <input type="text" id="email" name="email"><br />
+            <label for="pass">Password:</label><br />
+            <input type="password" id="pass" name="pass" value=""><br /><br />
+            <input type="submit" value="Log in">
+        </form>
+    </dialog>
+
+    <div id="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+
+	<div id="sidebar" onmouseover="expandSide()" onmouseout="collapseSide()">
+		<div>
+			<div class="button" id="new">
+				<!--
+				<div class="text">New Bap</div>
+				-->
+				<div class="icon"><i class="fas fa-file"></i></div>
+			</div>
+			<div class="button" id="share">
+				<!--
+				<div class="text">Share Bap</div>
+				-->
+				<div class="icon"><i class="fas fa-share"></i></div>
+			</div>
+		</div>
+		<div>
+			<div class="button" id="account">
+				<!--
+				<div class="text">Account</div>
+				-->
+				<div class="icon"><i class="fas fa-user"></i></div>
+			</div>
+			<div class="button" id="settings">
+				<!--
+				<div class="text">Settings</div>
+				-->
+				<div class="icon"><i class="fas fa-cog"></i></div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

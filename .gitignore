@@ -1,0 +1,6 @@
+# build artifacts
+dist
+.venv
+
+# compiled python
+*.pyc
