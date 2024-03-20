@@ -1,6 +1,48 @@
 {% extends "base.html" %}
 {% block content %}
-<pre>
-{{bap_content}}
-</pre>
+<div id="editor"></div>
+
+<style>
+	html, body, #editor {
+		position: absolute;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		margin: 0;
+		padding: 0;
+		overflow: hidden;
+	}
+
+	body {
+		width: calc(100% - 56px) !important;
+	}
+</style>
+
+<script>
+		// sources setup
+    require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.45.0/min/vs' }});
+    window.MonacoEnvironment = { getWorkerUrl: () => proxy };
+
+    let proxy = URL.createObjectURL(new Blob([`
+        self.MonacoEnvironment = {
+            baseUrl: 'https://unpkg.com/monaco-editor@0.45.0/min/'
+        };
+        importScripts('https://unpkg.com/monaco-editor@0.45.0/min/vs/base/worker/workerMain.js');
+    `], { type: 'text/javascript' }));
+
+
+    // editor init
+    let editor
+
+    require(["vs/editor/editor.main"], function () {
+        editor = monaco.editor.create(document.getElementById('editor'), {
+					value: "{{bap_content}}",
+					readOnly: true,
+        	automaticLayout: true,
+        	minimap: {enabled: false, },
+        	theme: 'vs-dark'
+        });
+    });
+</script>
+
 {% endblock %}
