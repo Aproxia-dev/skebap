@@ -2,23 +2,9 @@
 {% block content %}
 <div id="editor"></div>
 
-<style>
-	html, body, #editor {
-		position: absolute;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		margin: 0;
-		padding: 0;
-		overflow: hidden;
-	}
-
-	body {
-		width: calc(100% - 56px) !important;
-	}
-</style>
-
 <script>
+	
+
 		// sources setup
     require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.45.0/min/vs' }});
     window.MonacoEnvironment = { getWorkerUrl: () => proxy };
