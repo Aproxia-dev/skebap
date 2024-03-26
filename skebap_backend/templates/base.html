@@ -79,8 +79,59 @@
 
 	}
 
-	function openBapMeta() {
+	function requestLogin() {
+		const form = document.forms["login"]
 
+		const email = form["email"].value
+		const pass = form["pass"].value
+
+		fetch('/api/token/', {
+			method: "POST",
+			body: "username={email}&password={pass}"
+				.replaceAll("{email}", email)
+				.replaceAll("{pass}", pass),
+			headers: {
+				"Content-type": "application/x-www-form-urlencoded",
+			}
+		})
+			.then(response => {
+				if (response.ok) {
+					response.json().then(json => {
+						setCookie("token", json['access_token'], 7);
+					})
+					closeAllDialogs()
+				} else {
+					alert(response.statusText)
+				}
+			})
+	}
+
+	function requestRegister() {
+		const form = document.forms["register"]
+
+		const email = form["email"].value
+		const pass = form["pass"].value
+
+		fetch('/api/register/', {
+			method: "POST",
+			body: JSON.stringify({
+				email: email,
+				password: pass
+			}),
+			headers: {
+				"Content-type": "application/json; charset=UTF-8",
+			}
+		})
+			.then(response => {
+				if (response.ok) {
+					response.json().then(json => {
+						setCookie("token", json['access_token'], 7);
+					})
+					closeAllDialogs()
+				} else {
+					alert(response.statusText)
+				}
+			})
 	}
 
 	function expandSide() {

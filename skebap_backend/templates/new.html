@@ -75,7 +75,7 @@
             .then(response => {
                 if (response.ok) {
                     editor.setValue("")
-                    response.json().then(json =>{
+                    response.json().then(json => {
                         const new_url = '/bap/' + json['id'];
 
                         // htmx.ajax('GET', new_url, '#content')
