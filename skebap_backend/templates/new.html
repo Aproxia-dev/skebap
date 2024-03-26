@@ -52,7 +52,8 @@
         fetch('/api/', {
             method: "POST",
             body: JSON.stringify({
-                content: editor.getValue()
+                content: editor.getValue(),
+				lang: null
             }),
             headers: {
               "Content-type": "application/json; charset=UTF-8"
@@ -62,15 +63,16 @@
                 if (response.ok) {
                     editor.setValue("")
                     response.json().then(json =>{
-                        const new_url = '/bap/' + json['id']
+                        const new_url = '/bap/' + json['id'];
 
-                        htmx.ajax('GET', new_url, '#content')
-                            .then(() => {
-                                history.pushState(null, "", new_url)
-                            })
+                        // htmx.ajax('GET', new_url, '#content')
+                        //     .then(() => {
+                        //         history.pushState(null, "", new_url)
+                        //     })
+						window.location.href = new_url;
                     })
                 } else {
-                    alert('ooopsssss')
+                    alert(response.statusText)
                 }
             })
     }

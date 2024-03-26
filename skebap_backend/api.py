@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
-from .models import Bap, User
+from .models import Bap, User, Lang
 from .db import engine
 from sqlalchemy import select
 from sqlalchemy.engine import Result, Row
@@ -29,11 +29,13 @@ class BapModel(BaseModel):
 
 class BapRequest(BapModel):
 	content: str
+	lang: Optional[str]
 
 
 class BapResponse(BapModel):
 	id: Optional[int] = None
 	content: str
+	lang: Optional[str]
 	creation_time: datetime
 	valid_until: datetime
 
@@ -83,7 +85,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 	user = Session(engine).execute(select(User).where(User.id == uid)).first()[0]
 	if user == None:
 		raise cred_exception
-	return user
+	return UserResponse(id = user.id, email = user.email)
 
 
 @router.post("/token")
@@ -99,7 +101,6 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
 @router.post("/register")
 async def register(user: NewUserRequest) -> Token:
 	if Session(engine).execute(select(User).where(User.email == user.email)).first() != None:
-		print(Session(engine).execute(select(User).where(User.email == user.email)).first())
 		raise HTTPException(status_code=403, detail="A user with that email already exists")
 	new_user = User(
 		email = user.email,
@@ -115,8 +116,8 @@ async def register(user: NewUserRequest) -> Token:
 	return Token(access_token=access_token, token_type="bearer")
 
 
-@router.get("/users/me", response_model=UserModel)
-async def read_users_me(current_user: Annotated[UserModel, Depends(get_current_user)]) -> UserResponse:
+@router.get("/users/me")
+async def read_users_me(current_user: Annotated[UserResponse, Depends(get_current_user)]) -> UserResponse:
 	return current_user
 
 
@@ -129,6 +130,7 @@ async def read_bap(bap_id: int) -> BapResponse:
 	return BapResponse(
 		id=result.id,
 		content=result.text,
+		lang=result.lang,
 		creation_time=result.creation_time,
 		valid_until=result.valid_until
 	)
@@ -137,8 +139,11 @@ async def read_bap(bap_id: int) -> BapResponse:
 @router.post("/")
 async def new_bap(bap: BapRequest) -> BapResponse:
 	creation_time = datetime.now()
+	if bap.lang != None and Session(engine).execute(select(Lang).where(Lang.lang == bap.lang)).first() == None:
+		raise HTTPException(status_code=400, detail="Invalid language")
 	new_bap = Bap(
 		text=bap.content,
+		lang=bap.lang,
 		creation_time=creation_time,
 		valid_until=creation_time + timedelta(days=14)
 	)
@@ -151,6 +156,7 @@ async def new_bap(bap: BapRequest) -> BapResponse:
 	return BapResponse(
 		id=new_bap.id,
 		content=new_bap.text,
+		lang=new_bap.lang,
 		creation_time=new_bap.creation_time,
 		valid_until=new_bap.valid_until
 	)

@@ -1,42 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-    <meta name="description" content="Upload code snippets and logs with a single drag-and-drop!" />
-    <link rel="stylesheet" href="/static/main.css">
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <script src="https://kit.fontawesome.com/497f4f4907.js" crossorigin="anonymous"></script>
-    {% if monaco %}
-    <script src="https://unpkg.com/monaco-editor@0.45.0/min/vs/loader.js"></script>
-    {% endif %}
-    <title>Skebap</title>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+	<meta name="description" content="Upload code snippets and logs with a single drag-and-drop!" />
+	<link rel="stylesheet" href="/static/main.css">
+	<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+	<script src="https://kit.fontawesome.com/497f4f4907.js" crossorigin="anonymous"></script>
+	{% if monaco %}
+	<script src="https://unpkg.com/monaco-editor@0.45.0/min/vs/loader.js"></script>
+	{% endif %}
+	<title>Skebap</title>
 </head>
 <body>
-    <dialog id="login">
-        <form>
-            <label for="email">Email:</label><br />
-            <input type="text" id="email" name="email"><br />
-            <label for="pass">Password:</label><br />
-            <input type="password" id="pass" name="pass" value=""><br /><br />
-            <input type="submit" value="Log in">
-        </form>
-    </dialog>
+	<dialog id="login">
+		<button onclick="closeAllDialogs()">X</button>
+		<form>
+			<label for="email">Email:</label><br />
+			<input type="text" id="email" name="email"><br />
+			<label for="pass">Password:</label><br />
+			<input type="password" id="pass" name="pass" value=""><br /><br />
+			<div>
+			<p onclick="openDialog(register)">Register</p>
+			<input type="submit" value="Log in">
+			</div>
+		</form>
+	</dialog>
 
-    <div id="content">
-        {% block content %}
-        {% endblock %}
-    </div>
+	<dialog id="register">
+		<button onclick="closeAllDialogs()">X</button>
+		<form>
+			<label for="email">Email:</label><br />
+			<input type="text" id="email" name="email"><br />
+			<label for="pass">Password:</label><br />
+			<input type="password" id="pass" name="pass" value=""><br /><br />
+			<div>
+			<p onclick="openDialog(login)">Log in</p>
+			<input type="submit" value="Register">
+			</div>
+		</form>
+	</dialog>
 
-	<script>
-		function expandSide() {
-			console.log('expandSide')
+	<dialog id="bapSettings">
+		<button onclick="closeAllDialogs()">X</button>
+		<button onclick="pickLang()" id="langOpenDropdown"></button>
+		<div id="langDropdown" class="dropdown-content">
+
+		</div>
+	</dialog>
+
+	<dialog id="bapInfo">
+		<button onclick="closeAllDialogs()">X</button>
+		<p>sex asi</p>
+	</dialog>
+
+	<div id="content">
+		{% block content %}
+		{% endblock %}
+	</div>
+
+<script>
+	const login = document.getElementById("login")
+	const register = document.getElementById("register")
+	const bapSettings = document.getElementById("bapSettings")
+	const bapInfo = document.getElementById("bapInfo")
+
+	function closeAllDialogs() {
+		document.querySelectorAll("dialog").forEach(
+			function(node) {
+				node.close()
+			}
+		);
+	}
+	
+	function openDialog(dialog) {
+		closeAllDialogs();
+		dialog.showModal();
+	}
+
+	function openUser() {
+		if (typeof user !== 'undefined') {
+			console.log("bruh");
+		} else {
+			openDialog(login);
 		}
-		function collapseSide() {
-			console.log('collapseSide'
-    }
-	</script>
-	<div id="sidebar" onmouseover="expandSide()" onmouseout="collapseSide()">
+
+	}
+
+	function openBapMeta() {
+		if (editor.getOption(91) === false) {
+			openDialog(bapSettings)
+		} else {
+			openDialog(bapInfo)
+		}
+	}
+
+	function expandSide() {
+		console.log('expandSide')
+	}
+	function collapseSide() {
+		console.log('collapseSide')
+	}
+</script>
+
+	<div id="sidebar">
 		<div>
 			<a href="/">
 			<div class="button" id="new">
@@ -54,19 +121,20 @@
 			</div>
 		</div>
 		<div>
-			<div class="button" id="account">
+			<div class="button" id="account" onclick="openUser()">
 				<!--
 				<div class="text">Account</div>
 				-->
 				<div class="icon"><i class="fas fa-user"></i></div>
 			</div>
-			<div class="button" id="settings">
+			<div class="button" id="settings" onclick="openBapMeta()">
 				<!--
 				<div class="text">Settings</div>
 				-->
-				<div class="icon"><i class="fas fa-cog"></i></div>
+				<div class="icon"><i class="fas fa-code"></i></div>
 			</div>
 		</div>
 	</div>
 </body>
+
 </html>
