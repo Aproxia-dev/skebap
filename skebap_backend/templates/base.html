@@ -12,16 +12,40 @@
 	{% endif %}
 	<title>Skebap</title>
 </head>
+
+	<script>
+		function setCookie(cname, cvalue, exdays) {
+			const d = new Date();
+			d.setTime(d.getTime() + (exdays*24*60*60*1000));
+			let expires = "expires="+ d.toUTCString();
+			document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+		}
+
+		function getCookie(cname) {
+			let name = cname + "=";
+			let decodedCookie = decodeURIComponent(document.cookie);
+			let ca = decodedCookie.split(';');
+			for (let i = 0; i <ca.length; i++) {
+				let c = ca[i];
+				while (c.charAt(0) == ' ') {
+					c = c.substring(1);
+				} if (c.indexOf(name) == 0) {
+					return c.substring(name.length, c.length);
+				}
+			}
+			return "";
+		}
+	</script>
 <body>
 	<dialog id="login">
 		<button onclick="closeAllDialogs()">X</button>
-		<form>
+		<form name="login" onSubmit="requestLogin()">
 			<label for="email">Email:</label><br />
-			<input type="text" id="email" name="email"><br />
+			<input type="text" id="loginEmail" name="email"><br />
 			<label for="pass">Password:</label><br />
-			<input type="password" id="pass" name="pass" value=""><br /><br />
+			<input type="password" id="loginPass" name="pass" value=""><br /><br />
 			<div>
-			<p onclick="openDialog(register)">Register</p>
+			<p onclick="openDialog('register')">Register</p>
 			<input type="submit" value="Log in">
 			</div>
 		</form>
@@ -29,13 +53,13 @@
 
 	<dialog id="register">
 		<button onclick="closeAllDialogs()">X</button>
-		<form>
+		<form name="register" onSubmit="requestRegister()">
 			<label for="email">Email:</label><br />
-			<input type="text" id="email" name="email"><br />
+			<input type="text" id="registerEmail" name="email"><br />
 			<label for="pass">Password:</label><br />
-			<input type="password" id="pass" name="pass" value=""><br /><br />
+			<input type="password" id="registerPass" name="pass" value=""><br /><br />
 			<div>
-			<p onclick="openDialog(login)">Log in</p>
+			<p onclick="openDialog('login')">Log in</p>
 			<input type="submit" value="Register">
 			</div>
 		</form>
@@ -60,10 +84,11 @@
 	</div>
 
 <script>
-	const login = document.getElementById("login")
-	const register = document.getElementById("register")
-	const bapSettings = document.getElementById("bapSettings")
-	const bapInfo = document.getElementById("bapInfo")
+	document.querySelectorAll("form").forEach(
+		function(node) {
+			node.addEventListener('submit', event => event.preventDefault());
+		}
+	);
 
 	function closeAllDialogs() {
 		document.querySelectorAll("dialog").forEach(
@@ -75,24 +100,70 @@
 	
 	function openDialog(dialog) {
 		closeAllDialogs();
-		dialog.showModal();
+		document.getElementById(dialog).showModal();
 	}
 
 	function openUser() {
-		if (typeof user !== 'undefined') {
+		if (getCookie('token') !== "") {
 			console.log("bruh");
 		} else {
-			openDialog(login);
+			openDialog("login");
 		}
-
 	}
 
-	function openBapMeta() {
-		if (editor.getOption(91) === false) {
-			openDialog(bapSettings)
-		} else {
-			openDialog(bapInfo)
-		}
+	function requestLogin() {
+		const form = document.forms["login"]
+
+		const email = form["email"].value
+		const pass = form["pass"].value
+
+		fetch('/api/token/', {
+			method: "POST",
+			body: "username={email}&password={pass}"
+				.replaceAll("{email}", email)
+				.replaceAll("{pass}", pass),
+			headers: {
+				"Content-type": "application/x-www-form-urlencoded",
+			}
+		})
+			.then(response => {
+				if (response.ok) {
+					response.json().then(json => {
+						setCookie("token", json['access_token'], 7);
+					})
+					closeAllDialogs()
+				} else {
+					alert(response.statusText)
+				}
+			})
+	}
+
+	function requestRegister() {
+		const form = document.forms["register"]
+
+		const email = form["email"].value
+		const pass = form["pass"].value
+
+		fetch('/api/register/', {
+			method: "POST",
+			body: JSON.stringify({
+				email: email,
+				password: pass
+			}),
+			headers: {
+				"Content-type": "application/json; charset=UTF-8",
+			}
+		})
+			.then(response => {
+				if (response.ok) {
+					response.json().then(json => {
+						setCookie("token", json['access_token'], 7);
+					})
+					closeAllDialogs()
+				} else {
+					alert(response.statusText)
+				}
+			})
 	}
 
 	function expandSide() {

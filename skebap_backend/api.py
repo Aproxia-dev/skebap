@@ -82,17 +82,21 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 		token_data = TokenData(uid = uid)
 	except JWTError:
 		raise cred_exception
-	user = Session(engine).execute(select(User).where(User.id == uid)).first()[0]
+	user = Session(engine).execute(select(User).where(User.id == uid)).first()
 	if user == None:
 		raise cred_exception
+	else:
+		user = user[0]
 	return UserResponse(id = user.id, email = user.email)
 
 
 @router.post("/token")
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
-	user = Session(engine).execute(select(User).where(User.email == form_data.username)).first()[0]
+	user = Session(engine).execute(select(User).where(User.email == form_data.username)).first()
 	if user == None:
 		raise HTTPException(status_code=401, detail="Incorrect username or password")
+	else:
+		user = user[0]
 	if auth_user(user, form_data.password) == False:
 		raise HTTPException(status_code=401, detail="Incorrect username or password")
 	access_token = create_access_token(data={"uid": user.id})
