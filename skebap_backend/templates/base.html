@@ -41,14 +41,6 @@
 		</form>
 	</dialog>
 
-	<dialog id="bapSettings">
-		<button onclick="closeAllDialogs()">X</button>
-		<button onclick="pickLang()" id="langOpenDropdown"></button>
-		<div id="langDropdown" class="dropdown-content">
-
-		</div>
-	</dialog>
-
 	<dialog id="bapInfo">
 		<button onclick="closeAllDialogs()">X</button>
 		<p>sex asi</p>
@@ -66,13 +58,13 @@
 	const bapInfo = document.getElementById("bapInfo")
 
 	function closeAllDialogs() {
-		document.querySelectorAll("dialog").forEach(
+		return document.querySelectorAll("dialog").forEach(
 			function(node) {
 				node.close()
 			}
 		);
 	}
-	
+
 	function openDialog(dialog) {
 		closeAllDialogs();
 		dialog.showModal();
@@ -88,11 +80,7 @@
 	}
 
 	function openBapMeta() {
-		if (editor.getOption(91) === false) {
-			openDialog(bapSettings)
-		} else {
-			openDialog(bapInfo)
-		}
+
 	}
 
 	function expandSide() {
@@ -105,6 +93,7 @@
 
 	<div id="sidebar">
 		<div>
+			<!-- <div style="color:white;word-break:break-all;">{{ request.url }}</div> -->
 			<a href="/">
 			<div class="button" id="new">
 				<!--
@@ -127,12 +116,15 @@
 				-->
 				<div class="icon"><i class="fas fa-user"></i></div>
 			</div>
-			<div class="button" id="settings" onclick="openBapMeta()">
-				<!--
-				<div class="text">Settings</div>
-				-->
+			{% if editing is defined and editing %}
+			<div class="button" id="settings" onclick="openDialog(bapSettings)">
 				<div class="icon"><i class="fas fa-code"></i></div>
 			</div>
+			{% else %}
+			<div class="button" id="settings" onclick="openDialog(bapInfo)">
+				<div class="icon"><i class="fas fa-info"></i></div>
+			</div>
+			{% endif %}
 		</div>
 	</div>
 </body>

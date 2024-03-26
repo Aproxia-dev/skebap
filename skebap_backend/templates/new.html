@@ -2,6 +2,19 @@
 {% block content %}
 <div id="editor"></div>
 
+<dialog id="bapSettings">
+	<button onclick="closeAllDialogs()">X</button>
+	<select id="langOption">
+	</select>
+
+	<!--
+	<button onclick="pickLang()" id="langOpenDropdown"></button>
+	<div id="langDropdown" class="dropdown-content">
+
+	</div>
+	-->
+</dialog>
+
 <style>
     html, body, #editor {
         position: absolute;
@@ -76,6 +89,22 @@
                 }
             })
     }
+
+	const langOpts = document.getElementById("langOption")
+
+	/**
+	* Add a language option to language selector
+	* @param {string} name
+	* @param {string} value
+	*/
+	function addLanguageOption(name, value) {
+		let option = document.createElement("option")
+		let nameNode = document.createTextNode(name)
+
+		option.appendChild(nameNode)
+		option.setAttribute("value", value)
+		langOpts.append(option)
+	}
 
 </script>
 {% endblock %}

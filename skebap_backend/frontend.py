@@ -18,7 +18,7 @@ async def root(request: Request):
 
     return templates.TemplateResponse(
         "new.html",
-        {"request": request, "monaco": True},
+        {"request": request, "monaco": True, "editing": True},
         block_name=block,
     )
 
