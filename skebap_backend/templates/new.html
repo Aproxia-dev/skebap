@@ -81,14 +81,30 @@
 	* @param {string} name
 	* @param {string} value
 	*/
-	function addLanguageOption(name, value) {
+	function addLanguageOption(name, value, ext) {
 		let option = document.createElement("option")
-		let nameNode = document.createTextNode(name)
+		let nameNode = document.createTextNode("{name} ({ext})".replaceAll("{name}", name).replaceAll("{ext}", ext))
 
 		option.appendChild(nameNode)
 		option.setAttribute("value", value)
 		langOpts.append(option)
 	}
+
+    fetch('/api/langs', {
+        method: "GET",
+        })
+        .then(response => {
+            if (response.ok) {
+				response.json().then(json => {
+					for (let key in json['langs']) {
+						let lang = json['langs'][key];
+						addLanguageOption(lang.display_name, lang.lang, lang.file_extension)
+					}
+				})
+            } else {
+                alert(response.statusText)
+            }
+        })
 
 </script>
 {% endblock %}
