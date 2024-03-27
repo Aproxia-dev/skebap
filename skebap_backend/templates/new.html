@@ -16,27 +16,29 @@
 </dialog>
 
 <style>
-    html, body, #editor {
-        position: absolute;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-    }
+	html,
+	body,
+	#editor {
+		position: absolute;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		margin: 0;
+		padding: 0;
+		overflow: hidden;
+	}
 
-    body {
-        width: calc(100% - 56px) !important;
-    }
+	body {
+		width: calc(100% - 56px) !important;
+	}
 </style>
 
 <script>
-    // sources setup
-    require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.45.0/min/vs' }});
-    window.MonacoEnvironment = { getWorkerUrl: () => proxy };
+	// sources setup
+	require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.45.0/min/vs' } });
+	window.MonacoEnvironment = { getWorkerUrl: () => proxy };
 
-    let proxy = URL.createObjectURL(new Blob([`
+	let proxy = URL.createObjectURL(new Blob([`
     	self.MonacoEnvironment = {
     		baseUrl: 'https://unpkg.com/monaco-editor@0.45.0/min/'
     	};
@@ -44,53 +46,62 @@
     `], { type: 'text/javascript' }));
 
 
-    // editor init
-    let editor
+	// editor init
+	let editor
+	let changeLang
 
-    require(["vs/editor/editor.main"], function () {
-    	editor = monaco.editor.create(document.getElementById('editor'), {
-    		//value: [
-    		//	'function x() {',
-    		//	'\tconsole.log("Hello world!");',
-    		//	'}'
-    		//].join('\n'),
-    		//language: 'javascript',
-        automaticLayout: true,
-        minimap: {enabled: false, },
-    		theme: 'vs-dark'
-    	});
-    });
+	require(["vs/editor/editor.main"], function () {
+		editor = monaco.editor.create(document.getElementById('editor'), {
+			//value: [
+			//	'function x() {',
+			//	'\tconsole.log("Hello world!");',
+			//	'}'
+			//].join('\n'),
+			//language: 'javascript',
+			automaticLayout: true,
+			minimap: { enabled: false, },
+			theme: 'vs-dark'
+		});
+		changeLang = lang => {
+			monaco.editor.setModelLanguage(editor.getModel(), lang);
+			console.log(`model language was changed to ${editor.getModel().getLanguageIdentifier().language}`);
+		}
+	});
 
-    function upload() {
-        fetch('/api/', {
-            method: "POST",
-            body: JSON.stringify({
-                content: editor.getValue(),
+	function upload() {
+		fetch('/api/', {
+			method: "POST",
+			body: JSON.stringify({
+				content: editor.getValue(),
 				lang: null
-            }),
-            headers: {
-              "Content-type": "application/json; charset=UTF-8"
-            }
-        })
-            .then(response => {
-                if (response.ok) {
-                    editor.setValue("")
-                    response.json().then(json => {
-                        const new_url = '/bap/' + json['id'];
+			}),
+			headers: {
+				"Content-type": "application/json; charset=UTF-8"
+			}
+		})
+			.then(response => {
+				if (response.ok) {
+					editor.setValue("")
+					response.json().then(json => {
+						const new_url = '/bap/' + json['id'];
 
-                        // htmx.ajax('GET', new_url, '#content')
-                        //     .then(() => {
-                        //         history.pushState(null, "", new_url)
-                        //     })
+						// htmx.ajax('GET', new_url, '#content')
+						//     .then(() => {
+						//         history.pushState(null, "", new_url)
+						//     })
 						window.location.href = new_url;
-                    })
-                } else {
-                    alert(response.statusText)
-                }
-            })
-    }
+					})
+				} else {
+					alert(response.statusText)
+				}
+			})
+	}
 
 	const langOpts = document.getElementById("langOption")
+
+	langOpts.addEventListener("change", function () {
+		changeLang(langOpts.item(langOpts.selectedIndex))
+	})
 
 	/**
 	* Add a language option to language selector

@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 	<meta name="description" content="Upload code snippets and logs with a single drag-and-drop!" />
 	<link rel="stylesheet" href="/static/main.css">
 	<script src="https://unpkg.com/htmx.org@1.9.10"></script>
@@ -17,8 +18,8 @@
 <script>
 	function setCookie(cname, cvalue, exdays) {
 		const d = new Date();
-		d.setTime(d.getTime() + (exdays*24*60*60*1000));
-		let expires = "expires="+ d.toUTCString();
+		d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+		let expires = "expires=" + d.toUTCString();
 		document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 	}
 
