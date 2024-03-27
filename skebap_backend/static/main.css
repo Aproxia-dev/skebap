@@ -12,18 +12,17 @@
 	align-items: stretch;
 	justify-content: space-between;
 
-	background-color: #333;
+	background-color: #1E1E1E;
 }
 
 .button {
-	color: #fff;
+	color: #CCCCCC;
 	font-size: 40px;
 
 	display: flex;
 	flex-direction: row;
-	flex-flow: space-around;
-	align-items: end;
-	justify-content: space-between;
+	align-items: center;
+	justify-content: center;
 }
 
 .button .text {
@@ -38,7 +37,7 @@
 }
 
 .button:hover {
-	background-color: #555;
+	background-color: #5E5E5E;
 }
 
 html, body, #editor {

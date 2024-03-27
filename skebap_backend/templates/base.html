@@ -61,11 +61,23 @@
 			<input type="text" name="email"><br />
 			<label for="pass">Password:</label><br />
 			<input type="password" name="pass" value=""><br /><br />
+			<label for="passAgain">Repeat Password:</label><br />
+			<input type="password" name="passAgain" value=""><br /><br />
 			<div>
 			<p onclick="openDialog('login')">Log in</p>
 			<input type="submit" value="Register">
 			</div>
 		</form>
+	</dialog>
+
+	<dialog id="selfInfo">
+		<button onclick="closeAllDialogs()">X</button>
+		<p id="selfMessage"></p>
+		<button onclick="fetchBaps()">Fetch Own Baps</button>
+		<button onclick="setCookie('token', '', -1); closeAllDialogs();">Log Out</button>
+	</dialog>
+
+	<dialog id="fetchBaps">
 	</dialog>
 
 	<dialog id="bapInfo">
@@ -98,13 +110,49 @@
 		document.getElementById(dialog).showModal();
 	}
 
+	async function fetchLang(lang) {
+		const response = await fetch(`/api/lang/${lang}/`, {
+			method: "GET",
+		});
+	
+		if (response.ok) {
+			const json = await response.json();
+			return {
+				lang: json['lang'],
+				display_name: json['display_name'],
+				file_extension: json['file_extension'],
+			};
+		} else {
+			console.error('Failed to fetch language data');
+		}
+	}
+
 	function openUser() {
 		if (getCookie('token') !== "") {
-			console.log("bruh");
+			fetch('/api/self', {
+				method: "GET",
+				headers: {
+					"Authorization": "Bearer {token}"
+						.replace("{token}", getCookie("token"))
+				}
+			})
+				.then(response => {
+					if (response.ok) {
+						console.log("bruh");
+						response.json().then(json => {
+							document.getElementById("selfMessage").innerHTML = "You're currently logged in as {user}"
+								.replace("{user}", json['email'])
+							openDialog("selfInfo");
+						})
+					} else {
+						alert(response.statusText);
+						setCookie('token', '', -1)
+						openDialog("login");
+					}
+			})
 		} else {
 			openDialog("login");
 		}
-
 	}
 
 	function requestLogin() {
@@ -140,26 +188,73 @@
 		const email = form["email"].value
 		const pass = form["pass"].value
 
-		fetch('/api/register/', {
-			method: "POST",
-			body: JSON.stringify({
-				email: email,
-				password: pass
-			}),
-			headers: {
-				"Content-type": "application/json; charset=UTF-8",
-			}
-		})
-			.then(response => {
-				if (response.ok) {
-					response.json().then(json => {
-						setCookie("token", json['access_token'], 7);
-					})
-					closeAllDialogs()
-				} else {
-					alert(response.statusText)
+		if (pass !== form["passAgain"].value) {
+			alert("Passwords don't match!")
+			form["pass"].value = "";
+			form["passAgain"].value = "";
+		} else {
+			fetch('/api/register/', {
+				method: "POST",
+				body: JSON.stringify({
+					email: email,
+					password: pass
+				}),
+				headers: {
+					"Content-type": "application/json; charset=UTF-8",
 				}
 			})
+				.then(response => {
+					if (response.ok) {
+						response.json().then(json => {
+							setCookie("token", json['access_token'], 7);
+						})
+						closeAllDialogs()
+					} else {
+						alert(response.statusText)
+					}
+				})
+		}
+	}
+
+	async function fetchBaps() {
+		const response = await fetch('/api/self/baps', {
+			method: "GET",
+			headers: {
+				"Authorization": "Bearer {token}"
+					.replace("{token}", getCookie("token"))
+			}
+		})
+
+		if (response.ok) {
+			const json = await response.json()
+			let ret = [
+				"<button onclick='closeAllDialogs()'>X</button>"
+			]
+			for (let key in json['baps']) {
+				let bap = json['baps'][key];
+				let bapLang = await fetchLang(bap.lang);
+				let bapHTML = [
+					"<div class='bap'>",
+					"	<div class='bapText'>",
+					bap.content,
+					"	</div>",
+					"	<div class='bapMeta'>",
+					"		<div class='bapLang'>",
+					`${bapLang.display_name} (${bapLang.file_extension})`,
+					"		</div>",
+					"		<div class='bapDate'>",
+					bap.creation_time,
+					"		</div>",
+					"	</div>",
+					"</div>",
+				]
+				ret.push(bapHTML.join('\n'));
+			}
+			document.getElementById("fetchBaps").innerHTML= ret.join('\n');
+			openDialog("fetchBaps");
+		} else {
+			alert(response.statusText);
+		}
 	}
 
 	function expandSide() {

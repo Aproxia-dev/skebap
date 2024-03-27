@@ -51,15 +51,25 @@
 	});
 
 	function upload() {
+		var headers
+		if (getCookie('token') !== "") {
+			headers = {
+				"Content-type": "application/json; charset=UTF-8",
+				"Authorization": "Bearer {token}"
+					.replace("{token}", getCookie("token"))
+			}
+		} else {
+			headers = {
+				"Content-type": "application/json; charset=UTF-8",
+			}
+		}
 		fetch('/api/', {
 			method: "POST",
 			body: JSON.stringify({
 				content: editor.getValue(),
 				lang: langOpts.item(langOpts.selectedIndex).value
 			}),
-			headers: {
-				"Content-type": "application/json; charset=UTF-8"
-			}
+			headers: headers
 		})
 			.then(response => {
 				if (response.ok) {
