@@ -7,7 +7,7 @@ from .db import engine
 
 
 class Base(DeclarativeBase):
-	pass
+    pass
 
 
 class Bap(Base):
@@ -21,18 +21,20 @@ class Bap(Base):
 	valid_until: Mapped[datetime] = mapped_column(DateTime(), nullable=True)
 
 class User(Base):
-	__tablename__ = "users"
+    __tablename__ = "users"
 
-	id: Mapped[int] = mapped_column(Integer, primary_key=True)
-	email: Mapped[str] = mapped_column(Text, nullable=False)
-	pass_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    email: Mapped[str] = mapped_column(Text, nullable=False)
+    pass_hash: Mapped[str] = mapped_column(Text, nullable=False)
+
 
 class Lang(Base):
-	__tablename__ = "langs"
+    __tablename__ = "langs"
 
-	lang: Mapped[str] = mapped_column(Text, primary_key=True)
-	display_name: Mapped[str] = mapped_column(Text, nullable=False)
-	file_extension: Mapped[str] = mapped_column(Text, nullable=False)
+    lang: Mapped[str] = mapped_column(Text, primary_key=True)
+    display_name: Mapped[str] = mapped_column(Text, nullable=False)
+    file_extension: Mapped[str] = mapped_column(Text, nullable=False)
+
 
 Base.metadata.create_all(engine)
 
@@ -52,6 +54,6 @@ base_langs = [
 ]
 
 with Session(engine) as session:
-	if session.execute(select(Lang)).first() is None:
-		session.add_all(base_langs)
-		session.commit()
+    if session.execute(select(Lang)).first() is None:
+        session.add_all(base_langs)
+        session.commit()

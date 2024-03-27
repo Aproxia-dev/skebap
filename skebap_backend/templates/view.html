@@ -3,13 +3,13 @@
 <div id="editor"></div>
 
 <script>
-	
 
-		// sources setup
-    require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.45.0/min/vs' }});
-    window.MonacoEnvironment = { getWorkerUrl: () => proxy };
 
-    let proxy = URL.createObjectURL(new Blob([`
+	// sources setup
+	require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.45.0/min/vs' } });
+	window.MonacoEnvironment = { getWorkerUrl: () => proxy };
+
+	let proxy = URL.createObjectURL(new Blob([`
         self.MonacoEnvironment = {
             baseUrl: 'https://unpkg.com/monaco-editor@0.45.0/min/'
         };
@@ -17,8 +17,8 @@
     `], { type: 'text/javascript' }));
 
 
-    // editor init
-    let editor
+	// editor init
+	let editor
 
     require(["vs/editor/editor.main"], function () {
         editor = monaco.editor.create(document.getElementById('editor'), {
