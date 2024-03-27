@@ -39,18 +39,20 @@ class Lang(Base):
 Base.metadata.create_all(engine)
 
 base_langs = [
-	Lang(lang="javascript", display_name="JavaScript", file_extension=".js"),
-	Lang(lang="python",     display_name="Python",     file_extension=".py"),
-	Lang(lang="java",       display_name="Java",       file_extension=".java"),
-	Lang(lang="cpp",        display_name="C++",        file_extension=".cpp"),
-	Lang(lang="csharp",     display_name="C#",         file_extension=".cs"),
-	Lang(lang="php",        display_name="PHP",        file_extension=".php"),
-	Lang(lang="typescript", display_name="TypeScript", file_extension=".ts"),
-	Lang(lang="go",         display_name="Go",         file_extension=".go"),
-	Lang(lang="lua",        display_name="Lua",        file_extension=".lua"),
-	Lang(lang="shell",      display_name="Shell",      file_extension=".sh"),
-	Lang(lang="rust",       display_name="Rust",       file_extension=".rs"),
-	Lang(lang="kotlin",     display_name="Kotlin",     file_extension=".kt"),
+    Lang(lang="text", display_name="Plain text", file_extension=".txt"),
+    Lang(lang="markdown", display_name="Markdown", file_extension=".md"),
+    Lang(lang="javascript", display_name="JavaScript", file_extension=".js"),
+    Lang(lang="python", display_name="Python", file_extension=".py"),
+    Lang(lang="java", display_name="Java", file_extension=".java"),
+    Lang(lang="cpp", display_name="C++", file_extension=".cpp"),
+    Lang(lang="csharp", display_name="C#", file_extension=".cs"),
+    Lang(lang="php", display_name="PHP", file_extension=".php"),
+    Lang(lang="typescript", display_name="TypeScript", file_extension=".ts"),
+    Lang(lang="go", display_name="Go", file_extension=".go"),
+    Lang(lang="lua", display_name="Lua", file_extension=".lua"),
+    Lang(lang="shell", display_name="Shell", file_extension=".sh"),
+    Lang(lang="rust", display_name="Rust", file_extension=".rs"),
+    Lang(lang="kotlin", display_name="Kotlin", file_extension=".kt"),
 ]
 
 with Session(engine) as session:
