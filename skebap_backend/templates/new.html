@@ -46,7 +46,7 @@
 		});
 		changeLang = lang => {
 			monaco.editor.setModelLanguage(editor.getModel(), lang);
-			console.log(`model language was changed to ${editor.getModel().getLanguageIdentifier().language}`);
+			//console.log(`model language was changed to ${editor.getModel().getLanguageIdentifier().language}`);
 		}
 	});
 
@@ -55,7 +55,7 @@
 			method: "POST",
 			body: JSON.stringify({
 				content: editor.getValue(),
-				lang: null
+				lang: langOpts.item(langOpts.selectedIndex).value
 			}),
 			headers: {
 				"Content-type": "application/json; charset=UTF-8"
@@ -82,7 +82,7 @@
 	const langOpts = document.getElementById("langOption")
 
 	langOpts.addEventListener("change", function () {
-		changeLang(langOpts.item(langOpts.selectedIndex))
+		changeLang(langOpts.item(langOpts.selectedIndex).value)
 	})
 
 	/**
