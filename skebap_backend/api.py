@@ -48,6 +48,15 @@ class NewUserRequest(UserModel):
 class UserResponse(UserModel):
 	id: int
 
+class LangResponse(BaseModel):
+	lang: str
+	display_name: str
+	file_extension: str
+
+class LangsResponse(BaseModel):
+	langs: list[LangResponse]
+
+
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -123,6 +132,31 @@ async def register(user: NewUserRequest) -> Token:
 @router.get("/users/me")
 async def read_users_me(current_user: Annotated[UserResponse, Depends(get_current_user)]) -> UserResponse:
 	return current_user
+
+@router.get("/lang/{lang_id}")
+async def fetch_lang(lang_id: str) -> LangResponse:
+	result = Session(engine).execute(select(Lang).where(Lang.lang == lang_id)).first()
+	if result == None:
+		raise HTTPException(status_code=404, detail="Lang not found")
+	result = result[0]
+	return LangResponse(
+		lang = result.lang,
+		display_name = result.display_name,
+		file_extension = result.file_extension,
+	)
+
+
+@router.get("/langs")
+async def fetch_langs() -> LangsResponse:
+	ret = []
+
+	for lang in Session(engine).execute(select(Lang)).all():
+		ret.append(LangResponse(
+			lang = lang[0].lang,
+			display_name = lang[0].display_name,
+			file_extension = lang[0].file_extension,
+		))
+	return LangsResponse(langs = ret)
 
 
 @router.get("/{bap_id}")
