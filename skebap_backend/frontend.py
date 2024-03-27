@@ -36,6 +36,6 @@ async def view(request: Request, bap_id: int):
 
     return templates.TemplateResponse(
         "view.html",
-        {"request": request, "monaco": True, "bap_content": bap.content},
+        {"request": request, "monaco": True, "bap": bap},
         block_name=block,
     )

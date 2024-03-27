@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy import select
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, Session
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, Session, relationship
 from sqlalchemy.schema import ForeignKey
 from sqlalchemy.types import DateTime, Integer, Text
 from .db import engine
@@ -11,14 +11,17 @@ class Base(DeclarativeBase):
 
 
 class Bap(Base):
-	__tablename__ = "baps"
+    __tablename__ = "baps"
 
-	id: Mapped[int] = mapped_column(Integer, primary_key=True)
-	text: Mapped[str] = mapped_column(Text, nullable=False)
-	author_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
-	lang: Mapped[str] = mapped_column(ForeignKey("langs.lang"), nullable=True)
-	creation_time: Mapped[datetime] = mapped_column(DateTime(), nullable=False)
-	valid_until: Mapped[datetime] = mapped_column(DateTime(), nullable=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    author_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
+    author = relationship("User")
+    lang_id: Mapped[str] = mapped_column(ForeignKey("langs.lang"), nullable=False)
+    lang = relationship("Lang")
+    creation_time: Mapped[datetime] = mapped_column(DateTime(), nullable=False)
+    valid_until: Mapped[datetime] = mapped_column(DateTime(), nullable=True)
+
 
 class User(Base):
     __tablename__ = "users"

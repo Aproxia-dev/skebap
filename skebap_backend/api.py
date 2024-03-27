@@ -191,40 +191,44 @@ async def fetch_langs() -> LangsResponse:
 
 @router.get("/{bap_id}")
 async def read_bap(bap_id: int) -> BapResponse:
-	result = Session(engine).execute(select(Bap).where(Bap.id == bap_id)).first()
-	if result == None:
-		raise HTTPException(status_code=404, detail="Bap not found")
-	result = result[0]
-	return BapResponse(
-		id=result.id,
-		content=result.text,
-		lang=result.lang,
-		creation_time=result.creation_time,
-		valid_until=result.valid_until
-	)
+    result = Session(engine).execute(select(Bap).where(Bap.id == bap_id)).first()
+    if result == None:
+        raise HTTPException(status_code=404, detail="Bap not found")
+    result = result[0]
+    return BapResponse(
+        id=result.id,
+        content=result.text,
+        lang=result.lang.lang,
+        creation_time=result.creation_time,
+        valid_until=result.valid_until,
+    )
 
 
 @router.post("/")
 async def new_bap(bap: BapRequest) -> BapResponse:
-	creation_time = datetime.now()
-	if bap.lang != None and Session(engine).execute(select(Lang).where(Lang.lang == bap.lang)).first() == None:
-		raise HTTPException(status_code=400, detail="Invalid language")
-	new_bap = Bap(
-		text=bap.content,
-		lang=bap.lang,
-		creation_time=creation_time,
-		valid_until=creation_time + timedelta(days=14)
-	)
+    creation_time = datetime.now()
+    if (
+        bap.lang != None
+        and Session(engine).execute(select(Lang).where(Lang.lang == bap.lang)).first()
+        == None
+    ):
+        raise HTTPException(status_code=400, detail="Invalid language")
+    new_bap = Bap(
+        text=bap.content,
+        lang_id=bap.lang,
+        creation_time=creation_time,
+        valid_until=creation_time + timedelta(days=14),
+    )
 
-	with Session(engine) as session:
-		session.add(new_bap)
-		session.commit()
-		session.refresh(new_bap)
+    with Session(engine, expire_on_commit=False) as session:
+        session.add(new_bap)
+        session.commit()
+        session.refresh(new_bap, attribute_names=["lang"])
 
-	return BapResponse(
-		id=new_bap.id,
-		content=new_bap.text,
-		lang=new_bap.lang,
-		creation_time=new_bap.creation_time,
-		valid_until=new_bap.valid_until
-	)
+    return BapResponse(
+        id=new_bap.id,
+        content=new_bap.text,
+        lang=new_bap.lang.lang,
+        creation_time=new_bap.creation_time,
+        valid_until=new_bap.valid_until,
+    )
