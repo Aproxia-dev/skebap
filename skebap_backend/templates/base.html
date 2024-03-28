@@ -27,7 +27,7 @@
 		let name = cname + "=";
 		let decodedCookie = decodeURIComponent(document.cookie);
 		let ca = decodedCookie.split(';');
-		for (let i = 0; i <ca.length; i++) {
+		for (let i = 0; i < ca.length; i++) {
 			let c = ca[i];
 			while (c.charAt(0) == ' ') {
 				c = c.substring(1);
@@ -42,16 +42,21 @@
 <body>
 	<dialog id="login">
 		<div class="buttons flexRight">
-			<div onclick="closeAllDialogs()" class="close">X</div>
+			<div onclick="closeAllDialogs()" class="close">⨯</div>
 		</div>
 		<div class="content">
 			<form name="login" onSubmit="requestLogin()">
-				<label for="email">Email:</label><br />
-				<input type="text" name="email"><br />
-				<label for="pass">Password:</label><br />
-				<input type="password" name="pass" value=""><br /><br />
-				<div class="buttons">
-					<p onclick="openDialog('register')">Register</p>
+				<div class="formGroup">
+					<label for="email">Email:</label><br />
+					<input type="text" name="email">
+				</div>
+
+				<div class="formGroup">
+					<label for="pass">Password:</label><br />
+					<input type="password" name="pass" value="">
+				</div>
+				<div class="buttons formGroup">
+					<p id="logRegSwitch" onclick="openDialog('register')">Register</p>
 					<input type="submit" value="Log in">
 				</div>
 			</form>
@@ -60,18 +65,27 @@
 
 	<dialog id="register">
 		<div class="buttons flexRight">
-			<div onclick="closeAllDialogs()" class="close">X</div>
+			<div onclick="closeAllDialogs()" class="close">⨯</div>
 		</div>
 		<div class="content">
 			<form name="register" onSubmit="requestRegister()">
-				<label for="email">Email:</label><br />
-				<input type="text" name="email"><br />
-				<label for="pass">Password:</label><br />
-				<input type="password" name="pass" value=""><br /><br />
-				<label for="passAgain">Repeat Password:</label><br />
-				<input type="password" name="passAgain" value=""><br /><br />
-				<div class="buttons">
-					<p onclick="openDialog('login')">Log in</p>
+				<div class="formGroup">
+					<label for="email">Email:</label><br />
+					<input type="text" name="email">
+				</div>
+
+				<div class="formGroup">
+					<label for="pass">Password:</label><br />
+					<input type="password" name="pass" value="">
+				</div>
+
+				<div class="formGroup">
+					<label for="passAgain">Repeat Password:</label><br />
+					<input type="password" name="passAgain" value="">
+				</div>
+
+				<div class="buttons formGroup">
+					<p id="logRegSwitch" onclick="openDialog('login')">Log in</p>
 					<input type="submit" value="Register">
 				</div>
 			</form>
@@ -80,13 +94,13 @@
 
 	<dialog id="selfInfo">
 		<div class="buttons flexRight">
-			<div onclick="closeAllDialogs()" class="close">X</div>
+			<div onclick="closeAllDialogs()" class="close">⨯</div>
 		</div>
 		<div class="content">
 			<p id="selfMessage"></p>
 			<div class="buttons flexLeft">
 				<button onclick="fetchBaps()">Fetch Own Baps</button>
-				<button onclick="setCookie('token', '', -1); closeAllDialogs();">Log Out</button>
+				<button id="logout" onclick="setCookie('token', '', -1); closeAllDialogs();">Log Out</button>
 			</div>
 		</div>
 	</dialog>
@@ -96,7 +110,7 @@
 
 	<dialog id="bapInfo">
 		<div class="buttons flexRight">
-			<div onclick="closeAllDialogs()" class="close">X</div>
+			<div onclick="closeAllDialogs()" class="close">⨯</div>
 		</div>
 		<div class="content">
 			<p>sex asi</p>
@@ -108,117 +122,84 @@
 		{% endblock %}
 	</div>
 
-<script>
-	document.querySelectorAll("form").forEach(
-		function(node) {
-			node.addEventListener('submit', event => event.preventDefault());
-		}
-	);
-
-	function closeAllDialogs() {
-		return document.querySelectorAll("dialog").forEach(
-			function(node) {
-				node.close()
+	<script>
+		document.querySelectorAll("form").forEach(
+			function (node) {
+				node.addEventListener('submit', event => event.preventDefault());
 			}
 		);
-	}
 
-	function openDialog(dialog) {
-		closeAllDialogs();
-		document.getElementById(dialog).showModal();
-	}
-
-	async function fetchLang(lang) {
-		const response = await fetch(`/api/lang/${lang}/`, {
-			method: "GET",
-		});
-	
-		if (response.ok) {
-			const json = await response.json();
-			return {
-				lang: json['lang'],
-				display_name: json['display_name'],
-				file_extension: json['file_extension'],
-			};
-		} else {
-			console.error('Failed to fetch language data');
+		function closeAllDialogs() {
+			return document.querySelectorAll("dialog").forEach(
+				function (node) {
+					node.close()
+				}
+			);
 		}
-	}
 
-	function openUser() {
-		if (getCookie('token') !== "") {
-			fetch('/api/self', {
+		function openDialog(dialog) {
+			closeAllDialogs();
+			document.getElementById(dialog).showModal();
+		}
+
+		async function fetchLang(lang) {
+			const response = await fetch(`/api/lang/${lang}/`, {
 				method: "GET",
-				headers: {
-					"Authorization": "Bearer {token}"
-						.replace("{token}", getCookie("token"))
-				}
-			})
-				.then(response => {
-					if (response.ok) {
-						console.log("bruh");
-						response.json().then(json => {
-							document.getElementById("selfMessage").innerHTML = "You're currently logged in as {user}"
-								.replace("{user}", json['email'])
-							openDialog("selfInfo");
-						})
-					} else {
-						alert(response.statusText);
-						setCookie('token', '', -1)
-						openDialog("login");
-					}
-			})
-		} else {
-			openDialog("login");
-		}
-	}
+			});
 
-	function requestLogin() {
-		const form = document.forms["login"]
-
-		const email = form["email"].value
-		const pass = form["pass"].value
-
-		fetch('/api/token/', {
-			method: "POST",
-			body: "username={email}&password={pass}"
-				.replaceAll("{email}", email)
-				.replaceAll("{pass}", pass),
-			headers: {
-				"Content-type": "application/x-www-form-urlencoded",
+			if (response.ok) {
+				const json = await response.json();
+				return {
+					lang: json['lang'],
+					display_name: json['display_name'],
+					file_extension: json['file_extension'],
+				};
+			} else {
+				console.error('Failed to fetch language data');
 			}
-		})
-			.then(response => {
-				if (response.ok) {
-					response.json().then(json => {
-						setCookie("token", json['access_token'], 7);
+		}
+
+		function openUser() {
+			if (getCookie('token') !== "") {
+				fetch('/api/self', {
+					method: "GET",
+					headers: {
+						"Authorization": "Bearer {token}"
+							.replace("{token}", getCookie("token"))
+					}
+				})
+					.then(response => {
+						if (response.ok) {
+							console.log("bruh");
+							response.json().then(json => {
+								document.getElementById("selfMessage").innerHTML = "You're currently logged in as {user}"
+									.replace("{user}", json['email'])
+								openDialog("selfInfo");
+							})
+						} else {
+							alert(response.statusText);
+							setCookie('token', '', -1)
+							openDialog("login");
+						}
 					})
-					closeAllDialogs()
-				} else {
-					alert(response.statusText)
-				}
-			})
-	}
+			} else {
+				openDialog("login");
+			}
+		}
 
-	function requestRegister() {
-		const form = document.forms["register"]
+		function requestLogin() {
+			const form = document.forms["login"]
 
-		const email = form["email"].value
-		const pass = form["pass"].value
+			const email = form["email"].value
+			const pass = form["pass"].value
 
-		if (pass !== form["passAgain"].value) {
-			alert("Passwords don't match!")
-			form["pass"].value = "";
-			form["passAgain"].value = "";
-		} else {
-			fetch('/api/register/', {
+			fetch('/api/token/', {
 				method: "POST",
-				body: JSON.stringify({
-					email: email,
-					password: pass
-				}),
+				body: "username={email}&password={pass}"
+					.replaceAll("{email}", email)
+					.replaceAll("{pass}", pass),
 				headers: {
-					"Content-type": "application/json; charset=UTF-8",
+					"Content-type": "application/x-www-form-urlencoded",
 				}
 			})
 				.then(response => {
@@ -232,48 +213,81 @@
 					}
 				})
 		}
-	}
 
-	async function fetchBaps() {
-		const response = await fetch('/api/self/baps', {
-			method: "GET",
-			headers: {
-				"Authorization": "Bearer {token}"
-					.replace("{token}", getCookie("token"))
-			}
-		})
+		function requestRegister() {
+			const form = document.forms["register"]
 
-		if (response.ok) {
-			const json = await response.json()
-			let ret = [
-				"<button onclick='closeAllDialogs()'>X</button>"
-			]
-			for (let key in json['baps']) {
-				let bap = json['baps'][key];
-				let bapLang = await fetchLang(bap.lang);
-				let bapHTML = [
-					"<div class='bap'>",
-					"	<div class='bapText'>",
-					bap.content,
-					"	</div>",
-					"	<div class='bapMeta'>",
-					"		<div class='bapLang'>",
-					`${bapLang.display_name} (${bapLang.file_extension})`,
-					"		</div>",
-					"		<div class='bapDate'>",
-					bap.creation_time,
-					"		</div>",
-					"	</div>",
-					"</div>",
-				]
-				ret.push(bapHTML.join('\n'));
+			const email = form["email"].value
+			const pass = form["pass"].value
+
+			if (pass !== form["passAgain"].value) {
+				alert("Passwords don't match!")
+				form["pass"].value = "";
+				form["passAgain"].value = "";
+			} else {
+				fetch('/api/register/', {
+					method: "POST",
+					body: JSON.stringify({
+						email: email,
+						password: pass
+					}),
+					headers: {
+						"Content-type": "application/json; charset=UTF-8",
+					}
+				})
+					.then(response => {
+						if (response.ok) {
+							response.json().then(json => {
+								setCookie("token", json['access_token'], 7);
+							})
+							closeAllDialogs()
+						} else {
+							alert(response.statusText)
+						}
+					})
 			}
-			document.getElementById("fetchBaps").innerHTML= ret.join('\n');
-			openDialog("fetchBaps");
-		} else {
-			alert(response.statusText);
 		}
-	}
+
+		async function fetchBaps() {
+			const response = await fetch('/api/self/baps', {
+				method: "GET",
+				headers: {
+					"Authorization": "Bearer {token}"
+						.replace("{token}", getCookie("token"))
+				}
+			})
+
+			if (response.ok) {
+				const json = await response.json()
+				let ret = [
+					"<button onclick='closeAllDialogs()'>X</button>"
+				]
+				for (let key in json['baps']) {
+					let bap = json['baps'][key];
+					let bapLang = await fetchLang(bap.lang);
+					let bapHTML = [
+						"<div class='bap'>",
+						"	<div class='bapText'>",
+						bap.content,
+						"	</div>",
+						"	<div class='bapMeta'>",
+						"		<div class='bapLang'>",
+						`${bapLang.display_name} (${bapLang.file_extension})`,
+						"		</div>",
+						"		<div class='bapDate'>",
+						bap.creation_time,
+						"		</div>",
+						"	</div>",
+						"</div>",
+					]
+					ret.push(bapHTML.join('\n'));
+				}
+				document.getElementById("fetchBaps").innerHTML = ret.join('\n');
+				openDialog("fetchBaps");
+			} else {
+				alert(response.statusText);
+			}
+		}
 
 		function expandSide() {
 			console.log('expandSide')

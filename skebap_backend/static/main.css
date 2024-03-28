@@ -10,13 +10,90 @@
 
 	display: flex;
 	flex-direction: column;
-	flex-flow: space-around;
 	align-items: stretch;
 	justify-content: space-between;
 
 	background-color: #1E1E1E;
 }
 
+#sidebar div {
+	display: flex;
+	align-items: stretch;
+	justify-content: space-around;
+}
+
+@media screen {
+	body {
+		width: calc(100% - 56px) !important;
+	}
+
+	#sidebar div {
+		flex-direction: column;
+	}
+}
+
+
+@media screen and (orientation: portrait) {
+	#sidebar {
+		height: 56px;
+		width: 100%;
+
+		flex-direction: row;
+	}
+
+	body {
+		width: 100% !important;
+		height: calc(100% - 56px) !important;
+	}
+
+	#editor {
+		top: 56px;
+	}
+
+	#sidebar div {
+		flex-direction: row;
+	}
+}
+
+.formGroup {
+	margin: 0.5em 0;
+}
+
+button,
+input[type=submit] {
+	border-radius: 0;
+	background-color: #007acc;
+	color: white;
+	border: none;
+	padding: 0.2em;
+
+	font-family: inherit;
+	font-size: inherit;
+}
+
+#fetchBaps .bap {
+	margin: 0.5em 0;
+}
+
+#fetchBaps .bapText {
+	margin: 0.25em;
+	padding: 0.25em;
+	border-radius: 0.5em;
+
+	background-color: #00000044;
+
+	font-family: monospace;
+}
+
+#fetchBaps .bapMeta {
+	font-size: 0.8em;
+}
+
+#logRegSwitch {
+	color: white;
+}
+
+/* SIDEBAR BUTTONS */
 .button {
 	font-size: 40px;
 
@@ -24,6 +101,8 @@
 	flex-direction: row;
 	align-items: center;
 	justify-content: center;
+
+	color: #CCCCCC;
 }
 
 .button .text {
@@ -99,8 +178,4 @@ body,
 	color: #CCCCCC;
 	font-family: 'Atkinson Hyperlegible', sans-serif;
 	font-weight: 400;
-}
-
-body {
-	width: calc(100% - 56px) !important;
 }
