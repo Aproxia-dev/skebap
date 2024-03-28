@@ -70,7 +70,8 @@ class LangsResponse(BaseModel):
 
 
 router = APIRouter()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/token")
+required_oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/token")
+optional_oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/token", auto_error=False)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -93,38 +94,46 @@ def auth_user(user: Row, password: str):
 def create_access_token(
     data: dict, expires_delta: timedelta = timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
 ):
-	to_encode = data.copy()
-	expire = datetime.now() + expires_delta
-	to_encode.update({"exp": expire})
-	ret = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-	return ret
+    to_encode = data.copy()
+    expire = datetime.now() + expires_delta
+    to_encode.update({"exp": expire})
+    ret = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return ret
 
-async def check_for_user(user: Annotated[str, Depends(oauth2_scheme)]):
-	try:
-		return get_current_user(user)
-	except HTTPException:
-		return None
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
-	cred_exception = HTTPException(
-		status_code=401,
-		detail="Could not validate credentials",
-		headers={"WWW-Authenticate": "Bearer"},
-	)
-	try:
-		payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-		uid = payload.get("uid")
-		if uid == None:
-			raise cred_exception
-		token_data = TokenData(uid=uid)
-	except JWTError:
-		raise cred_exception
-	user = Session(engine).execute(select(User).where(User.id == uid)).first()
-	if user == None:
-		raise cred_exception
-	else:
-		user = user[0]
-	return UserResponse(id=user.id, email=user.email)
+async def get_current_user(token: str):
+    if token == None:
+        return None
+    cred_exception = HTTPException(
+        status_code=401,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        uid = payload.get("uid")
+        if uid == None:
+            raise cred_exception
+        token_data = TokenData(uid=uid)
+    except JWTError:
+        raise cred_exception
+    user = Session(engine).execute(select(User).where(User.id == uid)).first()
+    if user == None:
+        raise cred_exception
+    else:
+        user = user[0]
+    return UserResponse(id=user.id, email=user.email)
+
+
+async def get_optional_user(token: Annotated[str, Depends(optional_oauth2_scheme)]):
+    if token == None:
+        return None
+    else:
+        return await get_current_user(token)
+
+
+async def get_required_user(token: Annotated[str, Depends(required_oauth2_scheme)]):
+    return await get_current_user(token)
 
 
 @router.post("/token")
@@ -240,33 +249,36 @@ async def read_bap(bap_id: int) -> BapResponse:
 
 
 @router.post("/")
-async def new_bap(bap: BapRequest, author: Annotated[Optional[UserResponse], Depends(check_for_user)]) -> BapResponse:
-	creation_time = datetime.now()
-	author_id = author.id if author != None else None
-	if (
-		bap.lang != None
-		and Session(engine).execute(select(Lang).where(Lang.lang == bap.lang)).first()
-		== None
-	):
-		raise HTTPException(status_code=400, detail="Invalid language")
-	new_bap = Bap(
-		text=bap.content,
-		lang_id=bap.lang,
-		author_id = author_id,
-		creation_time=creation_time,
-		valid_until=creation_time + timedelta(days=14),
-	)
+async def new_bap(
+    bap: BapRequest,
+    author: Annotated[Optional[UserResponse], Depends(get_optional_user)],
+) -> BapResponse:
+    creation_time = datetime.now()
+    author_id = author.id if author != None else None
+    if (
+        bap.lang != None
+        and Session(engine).execute(select(Lang).where(Lang.lang == bap.lang)).first()
+        == None
+    ):
+        raise HTTPException(status_code=400, detail="Invalid language")
+    new_bap = Bap(
+        text=bap.content,
+        lang_id=bap.lang,
+        author_id=author_id,
+        creation_time=creation_time,
+        valid_until=creation_time + timedelta(days=14),
+    )
 
-	with Session(engine, expire_on_commit=False) as session:
-		session.add(new_bap)
-		session.commit()
-		session.refresh(new_bap, attribute_names=["lang"])
+    with Session(engine, expire_on_commit=False) as session:
+        session.add(new_bap)
+        session.commit()
+        session.refresh(new_bap, attribute_names=["lang"])
 
-	return BapResponse(
-		id=new_bap.id,
-		content=new_bap.text,
-		author=new_bap.author_id,
-		lang=new_bap.lang.lang,
-		creation_time=new_bap.creation_time,
-		valid_until=new_bap.valid_until,
-	)
+    return BapResponse(
+        id=new_bap.id,
+        content=new_bap.text,
+        author=new_bap.author_id,
+        lang=new_bap.lang.lang,
+        creation_time=new_bap.creation_time,
+        valid_until=new_bap.valid_until,
+    )
