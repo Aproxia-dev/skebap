@@ -17,54 +17,56 @@ ACCESS_TOKEN_EXPIRE_DAYS = 7
 
 
 class Token(BaseModel):
-	access_token: str
-	token_type: str
+    access_token: str
+    token_type: str
 
 
 class TokenData(BaseModel):
-	uid: int
+    uid: int
 
 
 class BapModel(BaseModel):
-	content: str
+    content: str
 
 
 class BapRequest(BapModel):
-	content: str
-	lang: str
+    content: str
+    lang: str
 
 
 class BapResponse(BapModel):
-	id: Optional[int] = None
-	content: str
-	author: Optional[int]
-	lang: Optional[str]
-	creation_time: datetime
-	valid_until: datetime
+    id: Optional[int] = None
+    content: str
+    author: Optional[int]
+    lang: Optional[str]
+    creation_time: datetime
+    valid_until: datetime
+
 
 class BapsResponse(BaseModel):
-	baps: list[BapResponse]
+    baps: list[BapResponse]
+
 
 class UserModel(BaseModel):
-	email: str
+    email: str
 
 
 class NewUserRequest(UserModel):
-	password: str
+    password: str
 
 
 class UserResponse(UserModel):
-	id: int
+    id: int
 
 
 class LangResponse(BaseModel):
-	lang: str
-	display_name: str
-	file_extension: str
+    lang: str
+    display_name: str
+    file_extension: str
 
 
 class LangsResponse(BaseModel):
-	langs: list[LangResponse]
+    langs: list[LangResponse]
 
 
 router = APIRouter()
@@ -73,23 +75,23 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def get_password_hash(password: str):
-	return pwd_context.hash(password + SECRET_KEY)
+    return pwd_context.hash(password + SECRET_KEY)
 
 
 def verify_password(password: str, pass_hash: str):
-	return pwd_context.verify(password + SECRET_KEY, pass_hash)
+    return pwd_context.verify(password + SECRET_KEY, pass_hash)
 
 
 def auth_user(user: Row, password: str):
-	if not user:
-		return False
-	if not verify_password(password, user.pass_hash):
-		return False
-	return user
+    if not user:
+        return False
+    if not verify_password(password, user.pass_hash):
+        return False
+    return user
 
 
 def create_access_token(
-	data: dict, expires_delta: timedelta = timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
+    data: dict, expires_delta: timedelta = timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
 ):
 	to_encode = data.copy()
 	expire = datetime.now() + expires_delta
@@ -127,109 +129,114 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 
 @router.post("/token")
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
-	user = (
-		Session(engine)
-		.execute(select(User).where(User.email == form_data.username))
-		.first()
-	)
-	if user == None:
-		raise HTTPException(status_code=401, detail="Incorrect username or password")
-	else:
-		user = user[0]
-	if auth_user(user, form_data.password) == False:
-		raise HTTPException(status_code=401, detail="Incorrect username or password")
-	access_token = create_access_token(data={"uid": user.id})
-	return Token(access_token=access_token, token_type="bearer")
+    user = (
+        Session(engine)
+        .execute(select(User).where(User.email == form_data.username))
+        .first()
+    )
+    if user == None:
+        raise HTTPException(status_code=401, detail="Incorrect username or password")
+    else:
+        user = user[0]
+    if auth_user(user, form_data.password) == False:
+        raise HTTPException(status_code=401, detail="Incorrect username or password")
+    access_token = create_access_token(data={"uid": user.id})
+    return Token(access_token=access_token, token_type="bearer")
 
 
 @router.post("/register")
 async def register(user: NewUserRequest) -> Token:
-	if (
-		Session(engine).execute(select(User).where(User.email == user.email)).first()
-		!= None
-	):
-		raise HTTPException(
-			status_code=403, detail="A user with that email already exists"
-		)
-	new_user = User(email=user.email, pass_hash=get_password_hash(user.password))
+    if (
+        Session(engine).execute(select(User).where(User.email == user.email)).first()
+        != None
+    ):
+        raise HTTPException(
+            status_code=403, detail="A user with that email already exists"
+        )
+    new_user = User(email=user.email, pass_hash=get_password_hash(user.password))
 
-	with Session(engine) as session:
-		session.add(new_user)
-		session.commit()
-		session.refresh(new_user)
+    with Session(engine) as session:
+        session.add(new_user)
+        session.commit()
+        session.refresh(new_user)
 
-	access_token = create_access_token(data={"uid": new_user.id})
-	return Token(access_token=access_token, token_type="bearer")
+    access_token = create_access_token(data={"uid": new_user.id})
+    return Token(access_token=access_token, token_type="bearer")
 
 
 @router.get("/self")
 async def read_self(
-	current_user: Annotated[UserResponse, Depends(get_current_user)]
+    current_user: Annotated[UserResponse, Depends(get_required_user)]
 ) -> UserResponse:
-	return current_user
+    return current_user
 
 
 @router.get("/lang/{lang_id}")
 async def fetch_lang(lang_id: str) -> LangResponse:
-	result = Session(engine).execute(select(Lang).where(Lang.lang == lang_id)).first()
-	if result == None:
-		raise HTTPException(status_code=404, detail="Lang not found")
-	result = result[0]
-	return LangResponse(
-		lang=result.lang,
-		display_name=result.display_name,
-		file_extension=result.file_extension,
-	)
+    result = Session(engine).execute(select(Lang).where(Lang.lang == lang_id)).first()
+    if result == None:
+        raise HTTPException(status_code=404, detail="Lang not found")
+    result = result[0]
+    return LangResponse(
+        lang=result.lang,
+        display_name=result.display_name,
+        file_extension=result.file_extension,
+    )
 
 
 @router.get("/langs")
 async def fetch_langs() -> LangsResponse:
-	ret = []
+    ret = []
 
-	for lang in Session(engine).execute(select(Lang)).all():
-		ret.append(
-			LangResponse(
-				lang=lang[0].lang,
-				display_name=lang[0].display_name,
-				file_extension=lang[0].file_extension,
-			)
-		)
-	return LangsResponse(langs=ret)
+    for lang in Session(engine).execute(select(Lang)).all():
+        ret.append(
+            LangResponse(
+                lang=lang[0].lang,
+                display_name=lang[0].display_name,
+                file_extension=lang[0].file_extension,
+            )
+        )
+    return LangsResponse(langs=ret)
+
 
 @router.get("/self/baps")
 async def read_own_baps(
-	current_user: Annotated[UserResponse, Depends(get_current_user)]
+    current_user: Annotated[UserResponse, Depends(get_required_user)]
 ) -> BapsResponse:
-	ret = []
+    ret = []
 
-	for bap in Session(engine).execute(select(Bap).where(Bap.author_id == current_user.id)).all():
-		ret.append(
-			BapResponse(
-				id=bap[0].id,
-				content=bap[0].text,
-				author=bap[0].author_id,
-				lang=bap[0].lang.lang,
-				creation_time=bap[0].creation_time,
-				valid_until=bap[0].valid_until,
-			)
-		)
-	return BapsResponse(baps=ret)
+    for bap in (
+        Session(engine)
+        .execute(select(Bap).where(Bap.author_id == current_user.id))
+        .all()
+    ):
+        ret.append(
+            BapResponse(
+                id=bap[0].id,
+                content=bap[0].text,
+                author=bap[0].author_id,
+                lang=bap[0].lang.lang,
+                creation_time=bap[0].creation_time,
+                valid_until=bap[0].valid_until,
+            )
+        )
+    return BapsResponse(baps=ret)
 
 
 @router.get("/{bap_id}")
 async def read_bap(bap_id: int) -> BapResponse:
-	result = Session(engine).execute(select(Bap).where(Bap.id == bap_id)).first()
-	if result == None:
-		raise HTTPException(status_code=404, detail="Bap not found")
-	result = result[0]
-	return BapResponse(
-		id=result.id,
-		content=result.text,
-		author=result.author_id,
-		lang=result.lang.lang,
-		creation_time=result.creation_time,
-		valid_until=result.valid_until,
-	)
+    result = Session(engine).execute(select(Bap).where(Bap.id == bap_id)).first()
+    if result == None:
+        raise HTTPException(status_code=404, detail="Bap not found")
+    result = result[0]
+    return BapResponse(
+        id=result.id,
+        content=result.text,
+        author=result.author_id,
+        lang=result.lang.lang,
+        creation_time=result.creation_time,
+        valid_until=result.valid_until,
+    )
 
 
 @router.post("/")

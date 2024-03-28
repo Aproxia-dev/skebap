@@ -5,7 +5,7 @@
 	position: fixed;
 	top: 0;
 	right: 0;
-	height: 100%; 
+	height: 100%;
 	width: 56px;
 
 	display: flex;
@@ -51,7 +51,9 @@ dialog {
 	padding: 8px;
 }
 
-dialog .content { padding: 12px; }
+dialog .content {
+	padding: 12px;
+}
 
 .buttons {
 	display: flex;
@@ -60,9 +62,13 @@ dialog .content { padding: 12px; }
 	gap: 16px;
 }
 
-.flexLeft { justify-content: left !important; }
+.flexLeft {
+	justify-content: left !important;
+}
 
-.flexRight { justify-content: right !important; }
+.flexRight {
+	justify-content: right !important;
+}
 
 .close {
 	all: unset;
@@ -75,9 +81,13 @@ dialog .content { padding: 12px; }
 	cursor: pointer;
 }
 
-.close:hover { background-color: #3e3e42; }
+.close:hover {
+	background-color: #3e3e42;
+}
 
-html, body, #editor {
+html,
+body,
+#editor {
 	position: absolute;
 	left: 0;
 	width: 100%;
