@@ -41,48 +41,66 @@
 
 <body>
 	<dialog id="login">
-		<button onclick="closeAllDialogs()">X</button>
-		<form name="login" onSubmit="requestLogin()">
-			<label for="email">Email:</label><br />
-			<input type="text" name="email"><br />
-			<label for="pass">Password:</label><br />
-			<input type="password" name="pass" value=""><br /><br />
-			<div>
-			<p onclick="openDialog('register')">Register</p>
-			<input type="submit" value="Log in">
-			</div>
-		</form>
+		<div class="buttons flexRight">
+			<div onclick="closeAllDialogs()" class="close">X</div>
+		</div>
+		<div class="content">
+			<form name="login" onSubmit="requestLogin()">
+				<label for="email">Email:</label><br />
+				<input type="text" name="email"><br />
+				<label for="pass">Password:</label><br />
+				<input type="password" name="pass" value=""><br /><br />
+				<div class="buttons">
+					<p onclick="openDialog('register')">Register</p>
+					<input type="submit" value="Log in">
+				</div>
+			</form>
+		</div>
 	</dialog>
 
 	<dialog id="register">
-		<button onclick="closeAllDialogs()">X</button>
-		<form name="register" onSubmit="requestRegister()">
-			<label for="email">Email:</label><br />
-			<input type="text" name="email"><br />
-			<label for="pass">Password:</label><br />
-			<input type="password" name="pass" value=""><br /><br />
-			<label for="passAgain">Repeat Password:</label><br />
-			<input type="password" name="passAgain" value=""><br /><br />
-			<div>
-			<p onclick="openDialog('login')">Log in</p>
-			<input type="submit" value="Register">
-			</div>
-		</form>
+		<div class="buttons flexRight">
+			<div onclick="closeAllDialogs()" class="close">X</div>
+		</div>
+		<div class="content">
+			<form name="register" onSubmit="requestRegister()">
+				<label for="email">Email:</label><br />
+				<input type="text" name="email"><br />
+				<label for="pass">Password:</label><br />
+				<input type="password" name="pass" value=""><br /><br />
+				<label for="passAgain">Repeat Password:</label><br />
+				<input type="password" name="passAgain" value=""><br /><br />
+				<div class="buttons">
+					<p onclick="openDialog('login')">Log in</p>
+					<input type="submit" value="Register">
+				</div>
+			</form>
+		</div>
 	</dialog>
 
 	<dialog id="selfInfo">
-		<button onclick="closeAllDialogs()">X</button>
-		<p id="selfMessage"></p>
-		<button onclick="fetchBaps()">Fetch Own Baps</button>
-		<button onclick="setCookie('token', '', -1); closeAllDialogs();">Log Out</button>
+		<div class="buttons flexRight">
+			<div onclick="closeAllDialogs()" class="close">X</div>
+		</div>
+		<div class="content">
+			<p id="selfMessage"></p>
+			<div class="buttons flexLeft">
+				<button onclick="fetchBaps()">Fetch Own Baps</button>
+				<button onclick="setCookie('token', '', -1); closeAllDialogs();">Log Out</button>
+			</div>
+		</div>
 	</dialog>
 
 	<dialog id="fetchBaps">
 	</dialog>
 
 	<dialog id="bapInfo">
-		<button onclick="closeAllDialogs()">X</button>
-		<p>sex asi</p>
+		<div class="buttons flexRight">
+			<div onclick="closeAllDialogs()" class="close">X</div>
+		</div>
+		<div class="content">
+			<p>sex asi</p>
+		</div>
 	</dialog>
 
 	<div id="content">
