@@ -30,6 +30,18 @@
 			theme: 'vs-dark'
 		});
 	});
+
+	async function populateBapInfo(langName) {
+		bapLang = await fetchLang(langName);
+		document.querySelector('#bapInfo .content').innerHTML = [
+			`<p>Lang: ${bapLang.display_name} (${bapLang.file_extension})</p>`,
+			`<p>Creation Time: {{bap.creation_time}}</p>`,
+			`<p>Valid Until: {{bap.valid_until}}</p>`,
+		].join('\n');
+	}
+
+	populateBapInfo("{{bap.lang}}");
+
 </script>
 
 {% endblock %}

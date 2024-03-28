@@ -37,6 +37,23 @@
 		}
 		return "";
 	}
+
+	async function fetchLang(lang) {
+		const response = await fetch(`/api/lang/${lang}/`, {
+			method: "GET",
+		});
+
+		if (response.ok) {
+			const json = await response.json();
+			return {
+				lang: json['lang'],
+				display_name: json['display_name'],
+				file_extension: json['file_extension'],
+			};
+		} else {
+			console.error('Failed to fetch language data');
+		}
+	}
 </script>
 
 <body>
@@ -142,23 +159,6 @@
 			document.getElementById(dialog).showModal();
 		}
 
-		async function fetchLang(lang) {
-			const response = await fetch(`/api/lang/${lang}/`, {
-				method: "GET",
-			});
-
-			if (response.ok) {
-				const json = await response.json();
-				return {
-					lang: json['lang'],
-					display_name: json['display_name'],
-					file_extension: json['file_extension'],
-				};
-			} else {
-				console.error('Failed to fetch language data');
-			}
-		}
-
 		function openUser() {
 			if (getCookie('token') !== "") {
 				fetch('/api/self', {
@@ -260,7 +260,9 @@
 			if (response.ok) {
 				const json = await response.json()
 				let ret = [
-					"<button onclick='closeAllDialogs()'>X</button>"
+					"<div class='buttons flexRight'>",
+					"	<div onclick='closeAllDialogs()' class='close'>⨯</div>",
+					"</div>"
 				]
 				for (let key in json['baps']) {
 					let bap = json['baps'][key];
