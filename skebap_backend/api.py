@@ -97,6 +97,11 @@ def create_access_token(
 	ret = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 	return ret
 
+async def check_for_user(user: Annotated[str, Depends(oauth2_scheme)]):
+	try:
+		return get_current_user(user)
+	except HTTPException:
+		return None
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 	cred_exception = HTTPException(
@@ -228,7 +233,7 @@ async def read_bap(bap_id: int) -> BapResponse:
 
 
 @router.post("/")
-async def new_bap(bap: BapRequest, author: Annotated[Optional[UserResponse], Depends(get_current_user)]) -> BapResponse:
+async def new_bap(bap: BapRequest, author: Annotated[Optional[UserResponse], Depends(check_for_user)]) -> BapResponse:
 	creation_time = datetime.now()
 	author_id = author.id if author != None else None
 	if (
