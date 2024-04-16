@@ -57,7 +57,7 @@
 				"Content-type": "application/json; charset=UTF-8",
 			}
 		}
-		fetch('/api/', {
+		fetch('/api/new', {
 			method: "POST",
 			body: JSON.stringify({
 				content: editor.getValue(),
@@ -103,7 +103,7 @@
 		langOpts.append(option)
 	}
 
-	fetch('/api/langs', {
+	fetch('/api/fetch/langs', {
 		method: "GET",
 	})
 		.then(response => {

@@ -39,7 +39,7 @@
 	}
 
 	async function fetchLang(lang) {
-		const response = await fetch(`/api/lang/${lang}/`, {
+		const response = await fetch(`/api/fetch/lang/${lang}/`, {
 			method: "GET",
 		});
 
@@ -161,7 +161,7 @@
 
 		function openUser() {
 			if (getCookie('token') !== "") {
-				fetch('/api/self', {
+				fetch('/api/fetch/self', {
 					method: "GET",
 					headers: {
 						"Authorization": "Bearer {token}"
@@ -249,7 +249,7 @@
 		}
 
 		async function fetchBaps() {
-			const response = await fetch('/api/self/baps', {
+			const response = await fetch('/api/fetch/self/baps', {
 				method: "GET",
 				headers: {
 					"Authorization": "Bearer {token}"

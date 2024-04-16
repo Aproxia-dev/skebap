@@ -173,14 +173,14 @@ async def register(user: NewUserRequest) -> Token:
     return Token(access_token=access_token, token_type="bearer")
 
 
-@router.get("/self")
+@router.get("/fetch/self")
 async def read_self(
     current_user: Annotated[UserResponse, Depends(get_required_user)]
 ) -> UserResponse:
     return current_user
 
 
-@router.get("/lang/{lang_id}")
+@router.get("/fetch/lang/{lang_id}")
 async def fetch_lang(lang_id: str) -> LangResponse:
     result = Session(engine).execute(select(Lang).where(Lang.lang == lang_id)).first()
     if result == None:
@@ -193,7 +193,7 @@ async def fetch_lang(lang_id: str) -> LangResponse:
     )
 
 
-@router.get("/langs")
+@router.get("/fetch/langs")
 async def fetch_langs() -> LangsResponse:
     ret = []
 
@@ -208,7 +208,7 @@ async def fetch_langs() -> LangsResponse:
     return LangsResponse(langs=ret)
 
 
-@router.get("/self/baps")
+@router.get("/fetch/self/baps")
 async def read_own_baps(
     current_user: Annotated[UserResponse, Depends(get_required_user)]
 ) -> BapsResponse:
@@ -232,7 +232,7 @@ async def read_own_baps(
     return BapsResponse(baps=ret)
 
 
-@router.get("/{bap_id}")
+@router.get("/fetch/bap/{bap_id}")
 async def read_bap(bap_id: int) -> BapResponse:
     result = Session(engine).execute(select(Bap).where(Bap.id == bap_id)).first()
     if result == None:
@@ -248,7 +248,7 @@ async def read_bap(bap_id: int) -> BapResponse:
     )
 
 
-@router.post("/")
+@router.post("/new")
 async def new_bap(
     bap: BapRequest,
     author: Annotated[Optional[UserResponse], Depends(get_optional_user)],
